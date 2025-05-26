@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=400, initial-scale=1.0" />
+  <title>Alarm Alert</title>
+  <style>
+    :root {
+      --body-theme: #1d1d1d;
+      --shadow: rgba(164, 189, 255, 0.575);
+      --seccound-color: #343434;
+      --third-color: #4E4FEB;
+      --thin-text-color: rgb(179, 179, 179);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    body {
+      background: var(--body-theme);
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alarm-box {
+      background: var(--body-theme);
+      width: calc(90% - 2.4rem);
+      height: 85%;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px var(--third-color);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .alarm-box h1 {
+      font-size: 1.2rem;
+      color: white;
+      margin: 0;
+      text-align: center;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    button {
+      flex: 1;
+      background: var(--third-color);
+      border: 2px solid var(--third-color);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: transparent;
+      color: white;
+    }
+
+    .spacer {
+      height: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="alarm-box">
+    <h1>Warning - Only five minutes left until your alarm</h1>
+    <div class="spacer"></div>
+    <div class="button-group">
+      <button onclick="cancelAlarm()">Cancel</button>
+      <button onclick="shutdownSystem()">Shutdown</button>
+      <button onclick="hibernateSystem()">Hibernate</button>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer, ipcMain } = require("electron");
+
+    function cancelAlarm() {ipcRenderer.send('close-alarm')}
+
+    function shutdownSystem() {ipcRenderer.send('shutdown')}
+
+    function hibernateSystem() {ipcRenderer.send('hibernate')}
+  </script>
+</body>
+</html>

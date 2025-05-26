@@ -1,0 +1,18 @@
+CFE - Care For Ever
+Custom License v1.0
+
+Copyright (c) 2025 Mohammad Mohammad Soltani
+
+Permission is hereby granted to any person to use, install, and distribute this software freely, 
+provided that:
+
+1. The software may only be used for personal or organizational purposes.
+2. Forking and modifying the code is allowed **only** if the changes are intended to be merged back into the official project, or to contribute to its development.
+3. It is strictly forbidden to rebrand, rename, or redistribute this software or its modified versions as a separate or independent project.
+4. Any derivative work must clearly acknowledge the original author and must not change the name, logo, or main identity of the software.
+5. Commercial use is allowed only with prior written permission from the author.
+
+Unauthorized redistribution or branding will result in legal action.
+
+Author: Mohammad Mohammad Soltani
+License Version: 1.0

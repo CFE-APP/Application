@@ -1,0 +1,35 @@
+{
+  "name": "cfe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "mohammad-mohammad-soltani",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "electron": "^36.3.1",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "flatpickr": "^4.6.13",
+    "jquery": "^3.7.1",
+    "node-cron": "^4.0.7"
+  },
+  "build": {
+    "appId": "com.mohammad-soltani.cfe",
+    "productName": "Care For Ever",
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      
+      "target": "nsis",
+      "icon": "build/icon.ico"
+
+    }
+  }
+}
