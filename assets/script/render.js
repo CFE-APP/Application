@@ -69,6 +69,9 @@ function main_scripts(page){
     $(".page-btn").click(function() {
         load_new_page($(this).data('page'))
     });
+    $("#download-spdlink").click(() => {
+        ipcRenderer.send('spd' , $("#spd-input").val())
+    })
 
     if(page == 'alarms') {
         ipcRenderer.send("GetAlarms" )
@@ -102,3 +105,6 @@ function main_scripts(page){
     }
 
 }
+ipcRenderer.on("spd-done" , (event , link ) => {
+    $("#spd-out").val(link)
+})

@@ -4,19 +4,25 @@ const path = require("path");
 const fs = require("fs");
 const cron = require("node-cron");
 const AutoLaunch = require("auto-launch");
+const https = require('https')
 let tray = null;
+const axios = require('axios');
+const crypto = require('crypto')
 
 let alert;
 let win;
-
+const spd_count = 5;
 const userDataPath = app.getPath('userData');
 const alarmsDir = path.join(userDataPath, 'alarm-log');
 const pathToAlarms = path.join(alarmsDir, 'alarms.json');
 const pathToConfigs = path.join(userDataPath, 'config.json');
-
+const SPDDIR = path.join(userDataPath, 'SPD');
 function ensureDirectories() {
     if (!fs.existsSync(alarmsDir)) {
         fs.mkdirSync(alarmsDir, { recursive: true });
+    }
+    if (!fs.existsSync(SPDDIR)) {
+        fs.mkdirSync(SPDDIR, { recursive: true });
     }
 }
 
@@ -323,4 +329,95 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
+});
+
+function downloadRange(url, start, end) {
+  return new Promise((resolve, reject) => {
+    const options = new URL(url);
+    options.headers = {
+      'Range': `bytes=${start}-${end}`
+    };
+
+    https.get(options, (res) => {
+      if (res.statusCode !== 206) {
+        reject(new Error(`Unexpected status code: ${res.statusCode}`));
+        return;
+      }
+
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+function getFileSize(url) {
+  return new Promise((resolve, reject) => {
+    const options = new URL(url);
+    options.method = 'HEAD'; // فقط هدرها، نه بدنه فایل
+
+    https.request(options, (res) => {
+      const length = res.headers['content-length'];
+      if (length) {
+        resolve(Number(length));
+      } else {
+        reject(new Error('Content-Length پیدا نشد'));
+      }
+    }).on('error', reject).end();
+  });
+}
+function sha1(data) {
+    return crypto.createHash('sha1').update(data, 'binary').digest('hex')
+}
+ipcMain.on('spd', async (event, link) => {
+  try {
+    const SPDDIR = path.join(userDataPath, 'SPD/'+sha1(link));
+    if (!fs.existsSync(SPDDIR)) {
+      fs.mkdirSync(SPDDIR, { mode: 0o744 });
+    }
+
+    const { headers } = await axios.head(link);
+    const fileSize = parseInt(headers['content-length'], 10);
+    const fileName = path.basename(new URL(link).pathname);
+    const filePath = path.join(SPDDIR, fileName);
+
+    const connections = 6; // Number of parallel connections
+    const partSize = Math.ceil(fileSize / connections);
+
+    const fileHandle = await fs.promises.open(filePath, 'w');
+
+    const agent = new (require('https').Agent)({
+      keepAlive: true,
+      maxSockets: connections,
+    });
+
+    const downloadPart = async (start, end, idx) => {
+      const res = await axios.get(link, {
+        headers: { Range: `bytes=${start}-${end}` },
+        responseType: 'arraybuffer',
+        httpsAgent: agent,
+      });
+
+      await fileHandle.write(Buffer.from(res.data), 0, res.data.length, start);
+      console.log(`Part ${idx + 1} downloaded: bytes ${start}-${end}`);
+    };
+
+    const tasks = [];
+    for (let i = 0; i < connections; i++) {
+      const start = i * partSize;
+      let end = (i + 1) * partSize - 1;
+      if (end > fileSize - 1) end = fileSize - 1;
+
+      tasks.push(downloadPart(start, end, i));
+    }
+
+    await Promise.all(tasks);
+    await fileHandle.close();
+
+    console.log('Download completed:', filePath);
+    event.reply('spd-done', filePath);
+  } catch (error) {
+    console.error('Download failed:', error);
+    event.reply('spd-error', error.message);
+  }
 });

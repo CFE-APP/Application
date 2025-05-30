@@ -356,3 +356,25 @@ body{
   border: none;
   border-radius: 0.5rem;
 }
+.spd-flex{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  input{
+    width: 95%;
+    border-radius: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--third-color);
+    color: white;
+    padding: 0.4rem 0.7rem;
+
+  }
+  button{
+    background: var(--third-color);
+    color: white;
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.4rem;
+    outline: none;
+    border: none;
+  }
+}
